@@ -1,0 +1,212 @@
+<HTML>
+
+<HEAD>
+    <script src="vexflow-min.js"></script>
+    <script src="kls.js"></script>
+    <style>
+        #scoreBox {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 500px;
+            margin: auto;
+            top: 20px;
+        }
+
+        .selector>ul {
+            display: inline;
+        }
+
+        .selector>ul>li {
+            display: inline;
+            margin-left: 5px;
+        }
+
+        #answerBar{
+            width: 100%;
+            height: 15px;
+        }
+    </style>
+</HEAD>
+
+<BODY>
+    <div>
+        <div class="selector">
+            Status
+            <ul id="stateMsg"></ul>
+        </div>
+        <div class="selector">
+            Octave
+            <ul>
+                <li><input type="number" id="octaveMin" min=0 max=8 value="3"
+                        onchange="onOctaveChanged(this.value, false)"></li>
+                <li> to <input type="number" id="octaveMax" min=0 max=8 value="5"
+                        onchange="onOctaveChanged(this.value, true)"></li>
+            </ul>
+        </div>
+        <div class="selector">
+            Major
+            <ul>
+                <li><input type="checkbox" name="scales" value="A">A</li>
+                <li><input type="checkbox" name="scales" value="B">B</li>
+                <li><input type="checkbox" name="scales" value="C" checked>C</li>
+                <li><input type="checkbox" name="scales" value="D">D</li>
+                <li><input type="checkbox" name="scales" value="E">E</li>
+                <li><input type="checkbox" name="scales" value="F">F</li>
+                <li><input type="checkbox" name="scales" value="G">G</li>
+                <li><input type="checkbox" name="scales" value="Ab">Ab</li>
+                <li><input type="checkbox" name="scales" value="Bb">Bb</li>
+                <li><input type="checkbox" name="scales" value="Db">Db/C#</li>
+                <li><input type="checkbox" name="scales" value="Eb">Eb</li>
+                <li><input type="checkbox" name="scales" value="Gb">Gb/F#</li>
+            </ul>
+        </div>
+        <div class="selector">
+            Minor
+            <ul>
+                <li><input type="checkbox" name="scales" value="a">a</li>
+                <li><input type="checkbox" name="scales" value="b">b</li>
+                <li><input type="checkbox" name="scales" value="c">c</li>
+                <li><input type="checkbox" name="scales" value="d">d</li>
+                <li><input type="checkbox" name="scales" value="e">e</li>
+                <li><input type="checkbox" name="scales" value="f">f</li>
+                <li><input type="checkbox" name="scales" value="g">g</li>
+            </ul>
+        </div>
+        <div class="selector">
+            Signature
+            <ul>
+                <li><input type="checkbox" id="switchSharp" onchange="onSwitchChanged(this)">&sharp;</li>
+                <li><input type="checkbox" id="switchFlat" onchange="onSwitchChanged(this)">&flat;</li>
+                <li><input type="checkbox" id="switchNatural" onchange="onSwitchChanged(this)">&natural;</li>
+            </ul>
+        </div>
+        <div class="selector">
+            Settings
+            <ul>
+                <li><input type="checkbox" id="switchShowNoteName" onchange="onSwitchChanged(this)">Note Name</li>
+            </ul>
+        </div>
+    </div>
+    <div id="scoreBox">
+        <div id="vfObj"></div>
+    </div>
+    <div id="answerBar"></div>
+</BODY>
+<script>
+    var kls = new KLS();
+    var settings = {
+        octave: { min: 0, max: 8 },
+        scales: [],
+        signatures: { flat: false, sharp: false, natural: false },
+        isShowNoteName: false
+    }
+
+    function onOctaveChanged(value, isMax) {
+
+        const obj = document.getElementById(isMax ? "octaveMin" : "octaveMax");
+        if ((isMax && value < obj.value) || (!isMax && value > obj.value)) {
+            obj.value = value;
+        }
+
+        this.settings.octave.min = parseInt(isMax ? obj.value : value);
+        this.settings.octave.max = parseInt(isMax ? value : obj.value);
+
+        updateSetting();
+    }
+
+    function onScalesChanged(s) {
+        var scales = this.settings.scales;
+        if (s.checked) {
+            //add
+            scales.push(s.value)
+        } else {
+            if (scales.length == 1) {
+                s.checked = true;
+                return;
+            }
+
+            //remove
+            for (var i = 0; i < scales.length; i++) {
+                if (scales[i] == s.value) {
+                    scales.splice(i, 1);
+                    break;
+                }
+            }
+        }
+
+        updateSetting();
+    }
+
+    function onSwitchChanged(s) {
+        switch (s.id) {
+            case "switchFlat": this.settings.signatures.flat = s.checked; break;
+            case "switchSharp": this.settings.signatures.sharp = s.checked; break;
+            case "switchNatural": this.settings.signatures.natural = s.checked; break;
+            case "switchShowNoteName": this.settings.isShowNoteName = s.checked; break;
+        }
+        updateSetting();
+    }
+
+    function updateSetting() {
+        kls.reset(settings);
+    }
+
+    function init() {
+        //octave
+        this.settings.octave = {
+            min: parseInt(document.getElementById("octaveMin").value),
+            max: parseInt(document.getElementById("octaveMax").value)
+        };
+
+        //scales
+        this.settings.scales = [];
+        document.getElementsByName("scales").forEach(item => {
+            //event
+            item.onchange = (e) => { onScalesChanged(e.target) };
+
+            //init value
+            if (item.checked) {
+                this.settings.scales.push(item.value);
+            }
+        });
+
+        //signatures
+        this.settings.signatures.flat = document.getElementById("switchFlat").checked
+        this.settings.signatures.sharp = document.getElementById("switchSharp").checked
+        this.settings.signatures.natural = document.getElementById("switchNatural").checked
+
+        //settings
+        this.settings.isShowNoteName = document.getElementById("switchShowNoteName").checked
+    }
+
+    function callback(data) {
+        if (!data) {
+            return;
+        }
+        if (data.stateMsg) {
+            document.getElementById("stateMsg").innerText = data.stateMsg;
+        }
+
+        if(data.answer != null){
+            document.getElementById("answerBar").style.backgroundColor = (data.answer?"green":"red");
+            setTimeout(function(){document.getElementById("answerBar").style.backgroundColor = "";},500)
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        init();
+        kls.init({
+            canvas: document.getElementById("vfObj"),
+            width: document.getElementById("scoreBox").offsetWidth, height: 500,
+            callback: callback
+        });
+        updateSetting();
+
+    });
+
+
+</script>
+
+</HTML>
