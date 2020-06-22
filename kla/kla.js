@@ -39,13 +39,13 @@ class KlaDisplay {
         }
     }
 
-    _getScaleName(scale){
-        let scaleName = scale.replace("#", '\u266F').replace("b",'\u266D');
-        if(scaleName.indexOf("m") > 0){
+    _getScaleName(scale) {
+        let scaleName = scale.replace("#", '\u266F').replace("b", '\u266D');
+        if (scaleName.indexOf("m") > 0) {
             return scaleName.replace("m", " minor");
-        }else{
+        } else {
             return scaleName + " major";
-        } 
+        }
     }
 
     display(scale, clef, key) {
@@ -66,7 +66,7 @@ class KlaDisplay {
         //show scale
         if (this._options.isShowScaleName) {
             //
-            stave.setTempo({ name: this._getScaleName(scale)}, 0);
+            stave.setTempo({ name: this._getScaleName(scale) }, 0);
         }
 
         // Connect it to the rendering context and draw!
@@ -99,6 +99,39 @@ class KlaDisplay {
 
 class KlaQuizGenerator {
     constructor() {
+        this.scales = [
+            { name: "C", keys: "CDEFGAB" },
+            { name: "G", keys: "GABCDEF#" },
+            { name: "D", keys: "DEF#GABC#" },
+            { name: "A", keys: "ABC#DEF#G#" },
+            { name: "E", keys: "EF#G#ABC#D#" },
+            { name: "B", keys: "BC#D#EF#G#A#" },
+            { name: "F#", keys: "F#G#A#BC#D#E#" },
+            { name: "C#", keys: "C#D#E#F#G#A#B#" },
+            { name: "F", keys: "FGABbCDE" },
+            { name: "Bb", keys: "BbCDEbFGA" },
+            { name: "Eb", keys: "EbFGAbBbCD" },
+            { name: "Ab", keys: "AbBbCDbEbFG" },
+            { name: "Db", keys: "DbEbFGbAbBbC" },
+            { name: "Gb", keys: "GbAbBbCbDbEbF" },
+            { name: "Cb", keys: "CbDbEbFbGbAbBb" },
+
+            { name: "Am", keys: "ABCDEFG" },
+            { name: "Em", keys: "EF#GABCD" },
+            { name: "Bm", keys: "BC#DEF#GA" },
+            { name: "F#m", keys: "F#G#ABC#DE" },
+            { name: "C#m", keys: "C#D#EF#G#AB" },
+            { name: "G#m", keys: "G#A#BC#D#EF#" },
+            { name: "D#m", keys: "D#E#F#G#A#BC#" },
+            { name: "A#m", keys: "A#B#C#D#E#F#G#" },
+            { name: "Dm", keys: "DEFGABbC" },
+            { name: "Gm", keys: "GABbCDEbF" },
+            { name: "Cm", keys: "CDEbFGAbBb" },
+            { name: "Fm", keys: "FGAbBbCDbEb" },
+            { name: "Bbm", keys: "BbCDbEbFGbAb" },
+            { name: "Ebm", keys: "EbFGbAbBbCbDb" },
+            { name: "Abm", keys: "AbBbCbDbEbFbGb" }
+        ]
         this.options = {
             range: {
                 octave: [3, 5],
@@ -152,40 +185,57 @@ class KlaQuizGenerator {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
-    _note2midi(note, octave, flat, sharp) {
-        const idx = "a_bc_d_ef_g".indexOf(note);
+    _note2midi(scaleName, noteName, octave, flat, sharp, natural) {
+        const idx = "A_BC_D_EF_G".indexOf(noteName);
         var midi = idx + 21 + 12 * (idx <= 2 ? octave : octave - 1);
-        if (flat) {
-            midi--;
+
+        for (let s = 0; s < this.scales.length; s++) {
+            if (this.scales[s].name == scaleName) {
+                const noteIdx = this.scales[s].keys.indexOf(noteName);
+                if (noteIdx == this.scales[s].keys.length - 1) {
+                    break;
+                }
+                let accidental = this.scales[s].keys[+1];
+                if (accidental == "#") {
+                    midi++;
+                } else if (accidental == "b") {
+                    midi--;
+                }
+                break;
+            }
         }
-        if (sharp) {
-            midi++;
-        }
+
+        // if (flat) {
+        //     midi--;
+        // }
+        // if (sharp) {
+        //     midi++;
+        // }
         return midi;
     }
 
     next() {
         //scale
-        const scale = this.options.range.scales[this._getRandomInt(0, this.options.range.scales.length - 1)];
+        const scaleName = this.options.range.scales[this._getRandomInt(0, this.options.range.scales.length - 1)];
 
         //octave
         const octave = this._getRandomInt(...this.options.range.octave);
         let clef = octave <= 3 ? "bass" : "treble";
 
         //note
-        let note = "cdefgab".substr(this._getRandomInt(0, 6), 1);
-        while ((octave == 0 && note != "a" && note != "b") || (octave == 8 && note != "c")) {
-            note = "cdefgab".substr(this._getRandomInt(0, 6), 1);
+        let noteName;
+        while (!noteName || (octave == 0 && noteName != "A" && noteName != "B") || (octave == 8 && noteName != "C")) {
+            noteName = "CDEFGAB".substr(this._getRandomInt(0, 6), 1);
         }
 
         //signature
 
         return {
-            scale: scale,
+            scaleName: scaleName,
             clef: clef,
             octave: octave,
-            note: note,
-            midi: this._note2midi(note, octave, false, false)
+            noteName: noteName,
+            midi: this._note2midi(scaleName, noteName, octave, false, false, false)
         };
     }
 }
@@ -254,6 +304,6 @@ class KLA {
 
     _next() {
         this._quiz = this._quizGenerator.next();
-        this._display.display(this._quiz.scale, this._quiz.clef, this._quiz.note + "/" + this._quiz.octave);
+        this._display.display(this._quiz.scaleName, this._quiz.clef, this._quiz.noteName.toLocaleLowerCase() + "/" + this._quiz.octave);
     }
 }
