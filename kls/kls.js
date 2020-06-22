@@ -34,13 +34,17 @@ class KlsDisplay {
         }
     }
 
-    display(clef, key) {
+    display(scale, clef, key) {
+        console.log(scale, clef,key);
         this._clean();
 
         this._currGroup = this._context.openGroup();
         var VF = Vex.Flow;
         // Create a stave of width 400 at position 10, 40 on the canvas.
         const stave = new VF.Stave(5, 0, this._options.width - 10);
+
+        //scale
+        stave.addKeySignature(scale);
 
         // Add a clef and time signature.
         stave.addClef(clef);
@@ -76,7 +80,7 @@ class KlsQuizGenerator {
         this.options = {
             range: {
                 octave: [3, 5],
-                scales: ["C", "D"],
+                scales: ["C"],
                 signatures: {
                     sharp: false,
                     flat: false,
@@ -134,23 +138,26 @@ class KlsQuizGenerator {
     }
 
     next() {
+        //scale
+        const scale = this.options.range.scales[this._getRandomInt(0, this.options.range.scales.length-1)];
+
         //octave
         const octave = this._getRandomInt(...this.options.range.octave);
+        let clef = octave <= 3 ? "bass" : "treble";
 
         //note
         let note = "cdefgab".substr(this._getRandomInt(0, 6), 1);
         while((octave == 0 && note != "a" && note != "b") || (octave == 8 && note != "c")){
             note = "cdefgab".substr(this._getRandomInt(0, 6), 1);
         }
-        
-        let clef = octave <= 3 ? "bass" : "treble";
-        //scale
 
         //signature
+        
         return {
+            scale: scale,
             clef: clef,
-            note: note,
             octave: octave,
+            note: note,
             midi: this._note2midi(note, octave, false, false)
         };
     }
@@ -220,6 +227,6 @@ class KLS {
 
     _next() {
         this._quiz = this._quizGenerator.next();
-        this._display.display(this._quiz.clef, this._quiz.note + "/" + this._quiz.octave);
+        this._display.display(this._quiz.scale, this._quiz.clef, this._quiz.note + "/" + this._quiz.octave);
     }
 }

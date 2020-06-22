@@ -23,10 +23,15 @@
             margin-left: 5px;
         }
 
+        .scale_selector>ul>li{
+            margin-right: 20px;
+        }
+
         #answerBar{
             width: 100%;
             height: 15px;
         }
+        
     </style>
 </HEAD>
 
@@ -45,33 +50,41 @@
                         onchange="onOctaveChanged(this.value, true)"></li>
             </ul>
         </div>
-        <div class="selector">
-            Major
+        <div class="selector scale_selector">
+            Scale
             <ul>
-                <li><input type="checkbox" name="scales" value="A">A</li>
-                <li><input type="checkbox" name="scales" value="B">B</li>
-                <li><input type="checkbox" name="scales" value="C" checked>C</li>
-                <li><input type="checkbox" name="scales" value="D">D</li>
-                <li><input type="checkbox" name="scales" value="E">E</li>
-                <li><input type="checkbox" name="scales" value="F">F</li>
-                <li><input type="checkbox" name="scales" value="G">G</li>
-                <li><input type="checkbox" name="scales" value="Ab">Ab</li>
-                <li><input type="checkbox" name="scales" value="Bb">Bb</li>
-                <li><input type="checkbox" name="scales" value="Db">Db/C#</li>
-                <li><input type="checkbox" name="scales" value="Eb">Eb</li>
-                <li><input type="checkbox" name="scales" value="Gb">Gb/F#</li>
-            </ul>
-        </div>
-        <div class="selector">
-            Minor
-            <ul>
-                <li><input type="checkbox" name="scales" value="a">a</li>
-                <li><input type="checkbox" name="scales" value="b">b</li>
-                <li><input type="checkbox" name="scales" value="c">c</li>
-                <li><input type="checkbox" name="scales" value="d">d</li>
-                <li><input type="checkbox" name="scales" value="e">e</li>
-                <li><input type="checkbox" name="scales" value="f">f</li>
-                <li><input type="checkbox" name="scales" value="g">g</li>
+                <li><input type="checkbox" name="scales" value="C" checked>C | Am</li>
+                <!--b-->
+                <li><input type="checkbox" name="scales" value="F" checked>F | Dm</li>
+                <!--#-->
+                <li><input type="checkbox" name="scales" value="G">G | Em</li>
+                <!--bb-->
+                <li><input type="checkbox" name="scales" value="Bb">B&flat; | Gm</li>
+                <!--##-->
+                <li><input type="checkbox" name="scales" value="D">D |Bm</li>
+
+                <!--bbb-->
+                <li><input type="checkbox" name="scales" value="Eb">E&flat; | Cm</li>
+                <!--###-->
+                <li><input type="checkbox" name="scales" value="A">A | F&sharp;m</li>
+                <!--bbbb-->
+                <li><input type="checkbox" name="scales" value="Ab">A&flat; | Fm</li>
+                <!--####-->
+                <li><input type="checkbox" name="scales" value="E">E | C&sharp;m</li>
+
+                <!--bbbbb-->
+                <li><input type="checkbox" name="scales" value="Db">D&flat;/C&sharp; | B&flat;m/A&sharp;m</li>
+                <!--#######-->
+                <li><input type="checkbox" name="scales" value="C#">C&sharp;/D&flat; | A&sharp;m/B&flat;m</li>
+                <!--#####-->
+                <li><input type="checkbox" name="scales" value="B">B/C&flat; | G&sharp;m/A&flat;m</li>
+                <!--bbbbbbb-->
+                <li><input type="checkbox" name="scales" value="Cb">C&flat;/B | A&flat;m/G&sharp;m</li>
+
+                <!--bbbbbb-->
+                <li><input type="checkbox" name="scales" value="Gb">G&flat;/F&sharp; | E&flat;m/D&sharp;m</li>
+                <!--######-->
+                <li><input type="checkbox" name="scales" value="F#">F&sharp;/G&flat; | D&sharp;m/E&flat;m/</li>
             </ul>
         </div>
         <div class="selector">
