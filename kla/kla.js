@@ -1,23 +1,28 @@
 //
-class KlsDisplay {
+class KlaDisplay {
     constructor(params) {
     }
 
     init(params) {
+        this._uiCallback = params.callback;
         var VF = Vex.Flow;
         var renderer = new VF.Renderer(params.canvas, VF.Renderer.Backends.SVG);
         this._options = {};
         this._options.width = params.width;
         this._options.height = params.height;
         this._options.isShowNoteName = params.isShowNoteName;
+        this._options.isShowScaleName = params.isShowScaleName;
         renderer.resize(params.width, params.height);
         this._context = renderer.getContext();
         this._context.setViewBox(0, -(params.height - 150) / 2, params.width, params.height)
+
     }
 
-    showNoteName(value) {
-        this._options.isShowNoteName = value;
+    setSwitches(scaleName = false, noteName = false) {
+        this._options.isShowScaleName = scaleName;
+        this._options.isShowNoteName = noteName;
     }
+
 
     _clean() {
         if (this._currGroup) {
@@ -34,8 +39,16 @@ class KlsDisplay {
         }
     }
 
+    _getScaleName(scale){
+        let scaleName = scale.replace("#", '\u266F').replace("b",'\u266D');
+        if(scaleName.indexOf("m") > 0){
+            return scaleName.replace("m", " minor");
+        }else{
+            return scaleName + " major";
+        } 
+    }
+
     display(scale, clef, key) {
-        console.log(scale, clef,key);
         this._clean();
 
         this._currGroup = this._context.openGroup();
@@ -48,6 +61,13 @@ class KlsDisplay {
 
         // Add a clef and time signature.
         stave.addClef(clef);
+
+
+        //show scale
+        if (this._options.isShowScaleName) {
+            //
+            stave.setTempo({ name: this._getScaleName(scale)}, 0);
+        }
 
         // Connect it to the rendering context and draw!
         stave.setContext(this._context).draw();
@@ -72,10 +92,12 @@ class KlsDisplay {
 
         // Then close the group:
         this._context.closeGroup();
+
+
     }
 }
 
-class KlsQuizGenerator {
+class KlaQuizGenerator {
     constructor() {
         this.options = {
             range: {
@@ -87,7 +109,8 @@ class KlsQuizGenerator {
                     natural: false
                 }
             },
-            isShowNoteName: false
+            isShowNoteName: false,
+            isShowScaleName: false
         }
     }
 
@@ -115,6 +138,10 @@ class KlsQuizGenerator {
                 }
             }
 
+            if (settings.isShowScaleName != null) {
+                this.options.isShowScaleName = settings.isShowScaleName;
+            }
+
             if (settings.isShowNoteName != null) {
                 this.options.isShowNoteName = settings.isShowNoteName;
             }
@@ -139,7 +166,7 @@ class KlsQuizGenerator {
 
     next() {
         //scale
-        const scale = this.options.range.scales[this._getRandomInt(0, this.options.range.scales.length-1)];
+        const scale = this.options.range.scales[this._getRandomInt(0, this.options.range.scales.length - 1)];
 
         //octave
         const octave = this._getRandomInt(...this.options.range.octave);
@@ -147,12 +174,12 @@ class KlsQuizGenerator {
 
         //note
         let note = "cdefgab".substr(this._getRandomInt(0, 6), 1);
-        while((octave == 0 && note != "a" && note != "b") || (octave == 8 && note != "c")){
+        while ((octave == 0 && note != "a" && note != "b") || (octave == 8 && note != "c")) {
             note = "cdefgab".substr(this._getRandomInt(0, 6), 1);
         }
 
         //signature
-        
+
         return {
             scale: scale,
             clef: clef,
@@ -163,7 +190,7 @@ class KlsQuizGenerator {
     }
 }
 
-class KlsMidi {
+class KlaMidi {
     init(callbacks) {
         if (navigator.requestMIDIAccess == null) {
             throw 'MIDI access not supported';
@@ -179,8 +206,8 @@ class KlsMidi {
         }
 
         access.onstatechange = (e) => {
-            if (this._callbacks  && this._callbacks.uiCallback) {
-                this._callbacks.uiCallback({stateMsg: e.port.name + "[" + e.port.manufacturer + "]" + "-" + e.port.state });
+            if (this._callbacks && this._callbacks.uiCallback) {
+                this._callbacks.uiCallback({ stateMsg: e.port.name + "[" + e.port.manufacturer + "]" + "-" + e.port.state });
             }
         };
     }
@@ -196,22 +223,22 @@ class KlsMidi {
 }
 
 //Keyboard Learning Assistant
-class KLS {
+class KLA {
     init(params) {
-        this._midi = new KlsMidi();
+        this._midi = new KlaMidi();
         this._midi.init({
             onNoteOn: (key, velocity) => { this._noteOn(key, velocity, params.callback) },
             uiCallback: params.callback
         });
 
-        this._display = new KlsDisplay();
+        this._display = new KlaDisplay();
         this._display.init(params);
 
-        this._quizGenerator = new KlsQuizGenerator();
+        this._quizGenerator = new KlaQuizGenerator();
     }
 
     reset(settings) {
-        this._display.showNoteName(settings.isShowNoteName);
+        this._display.setSwitches(settings.isShowScaleName, settings.isShowNoteName);
         this._quizGenerator.init(settings);
         this._next();
     }
@@ -221,7 +248,7 @@ class KLS {
             uiCallback({ answer: true });
             this._next();
         } else {
-            uiCallback({ answer: false});
+            uiCallback({ answer: false });
         }
     }
 
