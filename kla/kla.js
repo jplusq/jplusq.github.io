@@ -188,14 +188,13 @@ class KlaQuizGenerator {
     _note2midi(scaleName, noteName, octave, flat, sharp, natural) {
         const idx = "A_BC_D_EF_G".indexOf(noteName);
         var midi = idx + 21 + 12 * (idx <= 2 ? octave : octave - 1);
-
         for (let s = 0; s < this.scales.length; s++) {
             if (this.scales[s].name == scaleName) {
                 const noteIdx = this.scales[s].keys.indexOf(noteName);
                 if (noteIdx == this.scales[s].keys.length - 1) {
                     break;
                 }
-                let accidental = this.scales[s].keys[+1];
+                let accidental = this.scales[s].keys[noteIdx+1];
                 if (accidental == "#") {
                     midi++;
                 } else if (accidental == "b") {
