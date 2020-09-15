@@ -20,7 +20,7 @@
 <script>
     var tarBpm = parseInt(document.getElementById("tarBpm").value);
     document.getElementById("tarBpm").addEventListener("change", () => {
-        tarBpm = document.getElementById("tarBpm").value;
+        tarBpm = parseInt(document.getElementById("tarBpm").value);
         tarIntv = 60000 / tarBpm;
     });
 
@@ -53,9 +53,12 @@
     });
 
     function show(note) {
-        bpms.push({ x: xVal++, y: bpmCalc(note.duration) });
-        bpms.shift();
-        chart.render();
+        var bpm = bpmCalc(note.duration);
+        if (bpm > 0) {
+            bpms.push({ x: xVal++, y: bpm });
+            bpms.shift();
+            chart.render();
+        }
     }
 
     function bpmCalc(duration) {
@@ -74,6 +77,7 @@
                 return bpm;
             }
         }
+        return -1;
     }
 
     document.addEventListener("DOMContentLoaded", () => {
