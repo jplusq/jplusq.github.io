@@ -7,6 +7,8 @@
 
     </style>
     <title>Dashboard</title>
+    BPM = <input id="tarBpm" type="number" value="60"></input>
+    DIFF = <input id="tarDiff" type="number" value="16"></input>
     <div id="chartContainer" style="height: 370px; width:100%;"></div>
     <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
 </HEAD>
@@ -15,6 +17,17 @@
 
 </BODY>
 <script>
+    var tarBpm = parseInt(document.getElementById("tarBpm").value);
+    document.getElementById("tarBpm").addEventListener("change", () => {
+        tarBpm = document.getElementById("tarBpm").value;
+        tarIntv = 60000 / tarBpm;
+    });
+
+    var DIFF = 1 / parseInt(document.getElementById("tarDiff").value);
+    document.getElementById("tarDiff").addEventListener("change", () => {
+        DIFF = 1 / parseInt(document.getElementById("tarDiff").value);
+    });
+
     var midi = new MidiProcessor();
     var v = new Visualizer(show);
     function init() {
@@ -38,12 +51,26 @@
         }]
     });
 
-
-
     function show(note) {
-        bpms.push({ x: xVal++, y: parseInt(60000 / note.duration) });
+        bpms.push({ x: xVal++, y: bpmCalc(note.duration) });
         bpms.shift();
         chart.render();
+    }
+
+    function bpmCalc(duration) {
+        var bpm = tarBpm;
+        while (bpm > 0 && bpm < 1000) {
+            var tarIntv = 60000 / bpm;
+            var min = tarIntv * (1 - DIFF);
+            var max = tarIntv * (1 + DIFF);
+            if (duration < min) {
+                bpm++;
+            } else if (duration > max) {
+                bpm--;
+            } else {
+                return bpm;
+            }
+        }
     }
 
     document.addEventListener("DOMContentLoaded", () => {
