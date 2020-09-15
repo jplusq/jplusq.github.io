@@ -10,6 +10,7 @@
     BPM = <input id="tarBpm" type="number" value="60"></input>
     DIFF = <input id="tarDiff" type="number" value="16"></input>
     <div id="chartContainer" style="height: 370px; width:100%;"></div>
+    <center><span id="txtDebug"></span></center>
     <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
 </HEAD>
 
@@ -38,7 +39,7 @@
     var bpms = new Array(); // dataPoints
     var xVal = 0;
     for (var i = 0; i < 60; i++) {
-        bpms.push({ x: xVal++, y: 0 });
+        bpms.push({ x: xVal++, y: tarBpm });
     }
 
     var chart = new CanvasJS.Chart("chartContainer", {
@@ -61,8 +62,10 @@
         var bpm = tarBpm;
         while (bpm > 0 && bpm < 1000) {
             var tarIntv = 60000 / bpm;
-            var min = tarIntv * (1 - DIFF);
-            var max = tarIntv * (1 + DIFF);
+            var diff = tarIntv * DIFF;
+            var min = parseInt(tarIntv - diff);
+            var max = parseInt(tarIntv + diff);
+            document.getElementById("txtDebug").innerText = bpm + "+-" + parseInt(diff) + " [" + min + "," + max + "] " + duration;
             if (duration < min) {
                 bpm++;
             } else if (duration > max) {
