@@ -1,0 +1,55 @@
+<HTML>
+
+<HEAD>
+    <script src="v.js"></script>
+    <script src="MidiProcessor.js"></script>
+    <style>
+
+    </style>
+    <title>Dashboard</title>
+    <div id="chartContainer" style="height: 370px; width:100%;"></div>
+    <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+</HEAD>
+
+<BODY>
+
+</BODY>
+<script>
+    var midi = new MidiProcessor();
+    var v = new Visualizer(show);
+    function init() {
+        midi.init(v);
+    }
+
+
+    var bpms = new Array(); // dataPoints
+    var xVal = 0;
+    for (var i = 0; i < 10; i++) {
+        bpms.push({ x: xVal++, y: 0 });
+    }
+
+    var chart = new CanvasJS.Chart("chartContainer", {
+        title: {
+            text: "BPM"
+        },
+        data: [{
+            type: "line",
+            dataPoints: bpms
+        }]
+    });
+
+
+
+    function show(note) {
+        bpms.push({ x: xVal++, y: parseInt(60000 / note.duration) });
+        bpms.shift();
+        chart.render();
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        init();
+    });
+
+</script>
+
+</HTML>
