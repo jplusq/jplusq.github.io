@@ -10,6 +10,7 @@
     BPM = <input id="tarBpm" type="number" value="60"></input>
     DIFF = <input id="tarDiff" type="number" value="16"></input>
     <div id="chartContainer" style="height: 370px; width:100%;"></div>
+    <center><span id="txtSync"></span></center>
     <center><span id="txtDebug"></span></center>
     <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
 </HEAD>
@@ -35,7 +36,6 @@
         midi.init(v);
     }
 
-
     var bpms = new Array(); // dataPoints
     var xVal = 0;
     for (var i = 0; i < 60; i++) {
@@ -53,11 +53,15 @@
     });
 
     function show(note) {
-        var bpm = bpmCalc(note.duration);
-        if (bpm > 0) {
-            bpms.push({ x: xVal++, y: bpm });
-            bpms.shift();
-            chart.render();
+        if(note.interval){
+            var bpm = bpmCalc(note.interval);
+            if (bpm > 0) {
+                bpms.push({ x: xVal++, y: bpm });
+                bpms.shift();
+                chart.render();
+            }
+        }else if(note.sync){
+            document.getElementById("txtSync").innerText = note.sync;
         }
     }
 

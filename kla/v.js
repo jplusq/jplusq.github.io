@@ -4,6 +4,8 @@ class NoteStreamElement{
         this._velocity = velocity;
         this._onAt = Date.now();
         this._duration = null;
+        this.interval = null;
+        this.sync = null;
     }
     get note(){
         return this._note;
@@ -14,12 +16,15 @@ class NoteStreamElement{
     get duration(){
         return this._duration;
     }
+    get onAt(){
+        return this._onAt;
+    }
+
     off(){
         if(this._duration == null){
             this._duration = Date.now() - this._onAt;
             return true;
         }else{
-            console.log(this._duration);
             return false;
         }
     }
@@ -29,7 +34,22 @@ class NoteStream{
         this._elements = new Array();
     }
     noteOn(note,velocity){
-        this._elements.push(new NoteStreamElement(note,velocity));
+        var elmt = new NoteStreamElement(note,velocity);
+        var len = this._elements.length;
+        if(len > 2){
+            var diff = elmt.onAt - this._elements[len-1].onAt;
+            if(diff < 100){
+                //sync
+                elmt.sync = diff;
+            }else{
+                elmt.interval = diff;
+                if(this._elements[len-1].onAt - this._elements[len-2].onAt < 100){
+                    elmt.interval = elmt.onAt - this._elements[len-2].onAt;
+                }
+            }
+        }
+        this._elements.push(elmt);
+        return elmt;
     }
     noteOff(note)
     {
@@ -39,7 +59,7 @@ class NoteStream{
                 if(!elmt.off()){
                     console.log("failed to turn off note:", note);
                 }
-                return this._elements.splice(len,1);
+                break;
             }
         }
     }
@@ -50,9 +70,9 @@ class Visualizer{
         this._stream = new NoteStream();
     }
     noteOn(note, velocity){
-        this._stream.noteOn(note,velocity);
+        show(this._stream.noteOn(note,velocity));
     }
     noteOff(note){
-        show(this._stream.noteOff(note)[0]);
+        this._stream.noteOff(note);
     }
 }
