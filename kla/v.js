@@ -33,6 +33,7 @@ class NoteStream{
     constructor(){
         this._elements = new Array();
     }
+
     noteOn(note,velocity){
         var elmt = new NoteStreamElement(note,velocity);
         var len = this._elements.length;
@@ -49,8 +50,12 @@ class NoteStream{
             }
         }
         this._elements.push(elmt);
+        if(this._elements.length > 30){
+            this._elements.shift();
+        }
         return elmt;
     }
+
     noteOff(note)
     {
         for(var len = this._elements.length - 1; len > -1; len--){

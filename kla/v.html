@@ -37,17 +37,13 @@
     }
 
     var bpms = new Array(); // dataPoints
-    var xVal = 0;
-    for (var i = 0; i < 60; i++) {
-        bpms.push({ x: xVal++, y: tarBpm });
-    }
-
+    var count = 1;
     var chart = new CanvasJS.Chart("chartContainer", {
         title: {
             text: "BPM"
         },
         data: [{
-            type: "line",
+            type: "stepLine",
             dataPoints: bpms
         }]
     });
@@ -56,8 +52,10 @@
         if(note.interval){
             var bpm = bpmCalc(note.interval);
             if (bpm > 0) {
-                bpms.push({ x: xVal++, y: bpm });
-                bpms.shift();
+                bpms.push({x:count++, y: bpm});
+                while(bpms.length > 60){
+                    bpms.shift();
+                }
                 chart.render();
             }
         }else if(note.sync){
@@ -67,6 +65,9 @@
 
     function bpmCalc(duration) {
         var bpm = tarBpm;
+        if(duration > 4000){
+            return -1;
+        }
         while (bpm > 0 && bpm < 1000) {
             var tarIntv = 60000 / bpm;
             var diff = tarIntv * DIFF;
