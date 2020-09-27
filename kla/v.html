@@ -9,8 +9,14 @@
     <title>Dashboard</title>
     BPM = <input id="tarBpm" type="number" value="60"></input>
     DIFF = <input id="tarDiff" type="number" value="16"></input>
-    <div id="chartContainer" style="height: 370px; width:100%;"></div>
-    <center><span id="txtSync"></span></center>
+    <div style="width:100%">
+        <div id="chartBpm" style="height: 370px; width:50%; float: left;"></div>
+        <div id="chartDura" style="height: 370px; width:50%;"></div>    
+    </div>
+    <div style="width:100%">
+        <div id="chartSync" style="height: 370px; width:50%;float: left;"></div>
+        <div id="chartVelo" style="height: 370px; width:50%;"></div>
+    </div>
     <center><span id="txtDebug"></span></center>
     <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
 </HEAD>
@@ -37,8 +43,16 @@
     }
 
     var bpms = new Array(); // dataPoints
-    var count = 1;
-    var chart = new CanvasJS.Chart("chartContainer", {
+    var syncs = new Array();
+    var duras = new Array();
+    var velos = new Array();
+
+    var bpmCount = 1;
+    var syncCount = 1;
+    var duraCount = 1;
+    var veloCount =1;
+
+    var chartBpm = new CanvasJS.Chart("chartBpm", {
         title: {
             text: "BPM"
         },
@@ -47,20 +61,62 @@
             dataPoints: bpms
         }]
     });
+    var chartSync = new CanvasJS.Chart("chartSync", {
+        title: {
+            text: "SYNC"
+        },
+        data: [{
+            type: "stepLine",
+            dataPoints: syncs
+        }]
+    });
+    var chartDuration = new CanvasJS.Chart("chartDura", {
+        title: {
+            text: "Duration"
+        },
+        data: [{
+            type: "stepLine",
+            dataPoints: duras
+        }]
+    });
+    var chartVelo = new CanvasJS.Chart("chartVelo", {
+        title: {
+            text: "Velocity"
+        },
+        data: [{
+            type: "stepLine",
+            dataPoints: velos
+        }]
+    });
 
     function show(note) {
         if(note.interval){
             var bpm = bpmCalc(note.interval);
             if (bpm > 0) {
-                bpms.push({x:count++, y: bpm});
+                bpms.push({x:bpmCount++, y: bpm});
                 while(bpms.length > 60){
                     bpms.shift();
                 }
-                chart.render();
+                chartBpm.render();
             }
         }else if(note.sync){
-            document.getElementById("txtSync").innerText = note.sync;
+            syncs.push({x:syncCount++, y: note.sync});
+            while(syncs.length > 60){
+                syncs.shift();
+            }
+            chartSync.render();
         }
+        // duras.push({x:duraCount++, y: note.duration});
+        // while(duras.length > 60){
+        //     duras.shift();
+        // }
+        // chartDura.render();
+
+        velos.push({x:veloCount++, y: note.velocity});
+        while(velos.length > 60){
+            velos.shift();
+        }
+        chartVelo.render();
     }
 
     function bpmCalc(duration) {
