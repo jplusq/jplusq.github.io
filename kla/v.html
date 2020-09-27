@@ -56,6 +56,10 @@
         title: {
             text: "BPM"
         },
+        axisY :{
+            lineColor: "rgba(200,200,200,.8)",
+            gridColor: "rgba(200,200,200,.8)"
+        },
         data: [{
             type: "stepLine",
             dataPoints: bpms
@@ -65,17 +69,27 @@
         title: {
             text: "SYNC"
         },
+        axisY :{
+            lineColor: "rgba(200,200,200,.8)",
+            gridColor: "rgba(200,200,200,.8)"
+        },
         data: [{
-            type: "stepLine",
+            type: "line",
+            color: "red",
             dataPoints: syncs
         }]
     });
-    var chartDuration = new CanvasJS.Chart("chartDura", {
+    var chartDura = new CanvasJS.Chart("chartDura", {
         title: {
-            text: "Duration"
+            text: "Length"
+        },
+        axisY :{
+            lineColor: "rgba(200,200,200,.8)",
+            gridColor: "rgba(200,200,200,.8)"
         },
         data: [{
             type: "stepLine",
+            color: "purple",
             dataPoints: duras
         }]
     });
@@ -83,8 +97,13 @@
         title: {
             text: "Velocity"
         },
+        axisY :{
+            lineColor: "rgba(200,200,200,.8)",
+            gridColor: "rgba(200,200,200,.8)"
+        },
         data: [{
             type: "stepLine",
+            color: "darkgreen",
             dataPoints: velos
         }]
     });
@@ -106,17 +125,20 @@
             }
             chartSync.render();
         }
-        // duras.push({x:duraCount++, y: note.duration});
-        // while(duras.length > 60){
-        //     duras.shift();
-        // }
-        // chartDura.render();
 
         velos.push({x:veloCount++, y: note.velocity});
         while(velos.length > 60){
             velos.shift();
         }
         chartVelo.render();
+    }
+
+    function showDuration(note) {
+        duras.push({x:duraCount++, y: note.duration});
+        while(duras.length > 60){
+            duras.shift();
+        }
+        chartDura.render();
     }
 
     function bpmCalc(duration) {

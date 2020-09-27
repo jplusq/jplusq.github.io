@@ -50,7 +50,7 @@ class NoteStream{
             }
         }
         this._elements.push(elmt);
-        if(this._elements.length > 30){
+        while(this._elements.length > 30){
             this._elements.shift();
         }
         return elmt;
@@ -64,9 +64,10 @@ class NoteStream{
                 if(!elmt.off()){
                     console.log("failed to turn off note:", note);
                 }
-                break;
+                return elmt;
             }
         }
+        return null;
     }
 }
 
@@ -78,6 +79,6 @@ class Visualizer{
         show(this._stream.noteOn(note,velocity));
     }
     noteOff(note){
-        this._stream.noteOff(note);
+        showDuration(this._stream.noteOff(note));
     }
 }
